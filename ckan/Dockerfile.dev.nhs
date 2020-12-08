@@ -74,12 +74,7 @@ RUN pip install --no-cache-dir git+https://github.com/datopian/ckanext-s3filesto
     # GA
     pip install --no-cache-dir -e git+https://github.com/ckan/ckanext-googleanalytics.git#egg=ckanext-googleanalytics && \
     pip install --no-cache-dir -r https://raw.githubusercontent.com/ckan/ckanext-googleanalytics/master/requirements.txt && \
-    # Install NHS dataexplorer
-    #pip install --no-cache-dir -e git+https://cloud-service-account:hAN-sDLtC6NVoaYneX6f@gitlab.com/datopian/clients/nhs-dataexplorer.git@v0.1.6#egg=ckanext-nhs-dataexplorer && \
     pip install XlsxWriter && \
-    # Datopian's XLoader branch
-    #pip install --no-cache-dir -e git+https://github.com/datopian/ckanext-xloader.git@feature/nhs-remote-hook#egg=ckanext-xloader && \
-    #pip install --no-cache-dir -r https://raw.githubusercontent.com/datopian/ckanext-xloader/feature/nhs-remote-hook/requirements.txt && \
     # Install scheming extension from a pull request that contains fix for retaining "extra" fields for package
     pip install --no-cache-dir -e git+https://github.com/ckan/ckanext-scheming.git@refs/pull/229/head#egg=ckanext-scheming && \
     pip install --no-cache-dir -r https://raw.githubusercontent.com/ckan/ckanext-scheming/master/requirements.txt && \
@@ -88,11 +83,7 @@ RUN pip install --no-cache-dir git+https://github.com/datopian/ckanext-s3filesto
     # Security
     pip install --no-cache-dir -e git+https://github.com/datopian/ckanext-security.git#egg=ckanext-security && \
     # Install 'restricted' extension from our fork that has been aligned for our use case
-    pip install --no-cache-dir -e git+https://github.com/anuveyatsu/ckanext-restricted.git#egg=ckanext-restricted && \
-    # BigQuery Extension
-    #pip install --no-cache-dir -e git+https://github.com/datopian/ckanext-datastore-bigquery.git@v0.0.2.8#egg=ckanext-datastore-bigquery && \
-    #pip install --no-cache-dir -e git+https://github.com/datopian/ckanext-datastore-bigquery.git#egg=ckanext-datastore-bigquery && \
-    #pip install --no-cache-dir -r https://raw.githubusercontent.com/datopian/ckanext-datastore-bigquery/master/requirements.txt && \
+    pip install --no-cache-dir -e git+https://github.com/anuveyatsu/ckanext-restricted.git#egg=ckanext-restricted && \    
     # Ckan Aircan Extension
     pip install --no-cache-dir -r https://raw.githubusercontent.com/datopian/ckanext-aircan/v0.0.4/requirements.txt && \
     pip install --no-cache-dir -e git+https://github.com/datopian/ckanext-aircan.git@feature/giftless-uri#egg=ckanext-aircan && \
