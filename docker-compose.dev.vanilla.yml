@@ -1,0 +1,60 @@
+version: "3"
+
+services:
+
+  ckan-vanilla:
+    container_name: ckan-vanilla
+    build:
+      context: ckan/
+      dockerfile: Dockerfile.dev.vanilla
+    env_file:
+      - .env.vanilla      
+    links:
+      - db-vanilla
+      - solr-vanilla
+      - redis-vanilla
+      - datapusher-vanilla
+    networks:
+      default:
+        aliases:
+          - ckan.local.com
+    ports:
+      - "5000:5000"
+    volumes:
+      - ckan_storage_vanilla:/var/lib/ckan-vanilla
+      - ./src:/srv/app/src_extensions
+
+  datapusher-vanilla:
+    container_name: datapusher-vanilla
+    image: keitaro/ckan-datapusher:0.0.17
+    ports:
+        - "8000:8000"
+    environment:
+        - DATAPUSHER_SSL_VERIFY=False
+        - DATAPUSHER_REWRITE_URL=http://ckan.local.com:5000/
+        - DATAPUSHER_MAX_CONTENT_LENGTH=80000000
+
+  db-vanilla:
+    container_name: db-vanilla
+    env_file:
+      - .env.vanilla
+    build:
+      context: postgresql/
+    volumes:
+      - pg_data_vanilla:/var/lib/postgresql/data
+
+  solr-vanilla:
+    container_name: solr-vanilla
+    build:
+      context: solr/
+    volumes:
+      - solr_data_vanilla:/opt/solr/server/solr/ckan/data/index
+
+  redis-vanilla:
+    container_name: redis-vanilla
+    image: redis:alpine
+
+volumes:
+  ckan_storage_vanilla:
+  pg_data_vanilla:
+  solr_data_vanilla:

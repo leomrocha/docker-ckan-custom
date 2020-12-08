@@ -1,0 +1,149 @@
+FROM alpine:3.8
+ENV TZ UTC
+
+# Set CKAN version to build
+ENV GIT_URL=https://github.com/ckan/ckan.git
+ENV GIT_BRANCH=ckan-2.8.2
+
+# Set src dirs
+ENV SRC_DIR=/srv/app/src
+ENV PIP_SRC=${SRC_DIR}
+ENV APP_DIR=/srv/app
+ENV SRC_EXTENSIONS_DIR=/srv/app/src_extensions
+
+ENV CKAN__SITE_URL=http://ckan.local.com:5000
+ENV CKAN__PLUGINS envvars image_view text_view recline_view datastore datapusher
+ENV CKAN_INI=/srv/app/development.ini
+
+WORKDIR ${SRC_DIR}
+
+# Packages to build CKAN requirements and plugins
+RUN apk add --no-cache tzdata \
+                        git \
+                        gettext \
+                        postgresql-client \
+                        python2 \
+                        apache2-utils \
+                        libxml2 \
+                        libxslt \
+                        musl-dev \
+                        py2-gevent \
+                        uwsgi \
+                        uwsgi-http \
+                        uwsgi-corerouter \
+                        uwsgi-python \
+                        uwsgi-gevent \
+                        libmagic \
+                        curl 
+
+RUN apk add --no-cache --virtual .build-deps \
+                                    postgresql-dev  \
+                                    gcc \
+                                    make \
+                                    g++ \
+                                    autoconf \
+                                    automake \
+                                    libtool \
+                                    python-dev \
+                                    libxml2-dev \
+                                    libxslt-dev \
+                                    linux-headers 
+
+RUN apk add --no-cache libffi-dev
+                                
+RUN mkdir -p ${SRC_DIR} 
+
+RUN curl -o ${SRC_DIR}/get-pip.py https://bootstrap.pypa.io/get-pip.py && \   
+    python ${SRC_DIR}/get-pip.py &&  \  
+    pip install supervisor
+
+RUN rm -rf ${SRC_DIR}/get-pip.py
+
+RUN pip install -e git+${GIT_URL}@${GIT_BRANCH}#egg=ckan
+RUN cd ${SRC_DIR}/ckan && cp who.ini ${APP_DIR}
+RUN cd ${SRC_DIR}/ckan && pip install --no-binary :all: -r requirements.txt 
+RUN pip install -e git+https://github.com/okfn/ckanext-envvars.git#egg=ckanext-envvars    
+RUN paster --plugin=ckan make-config ckan ${CKAN_INI}
+
+RUN pip install --no-cache-dir git+https://github.com/datopian/ckanext-s3filestore.git@v0.1.2#egg=ckanext-s3filestore && \
+    pip install --no-cache-dir -r https://raw.githubusercontent.com/datopian/ckanext-s3filestore/v0.1.2/requirements.txt && \
+    # Pages
+    pip install --no-cache-dir -e git+https://github.com/keitaroinc/ckanext-pages.git@pages-ckan-2.8#egg=ckanext-pages && \
+    # Disqus
+    pip install --no-cache-dir -e git+https://github.com/ckan/ckanext-disqus.git#egg=ckanext-disqus && \
+    # GA
+    pip install --no-cache-dir -e git+https://github.com/ckan/ckanext-googleanalytics.git#egg=ckanext-googleanalytics && \
+    pip install --no-cache-dir -r https://raw.githubusercontent.com/ckan/ckanext-googleanalytics/master/requirements.txt && \
+    # Install NHS dataexplorer
+    #pip install --no-cache-dir -e git+https://cloud-service-account:hAN-sDLtC6NVoaYneX6f@gitlab.com/datopian/clients/nhs-dataexplorer.git@v0.1.6#egg=ckanext-nhs-dataexplorer && \
+    pip install XlsxWriter && \
+    # Datopian's XLoader branch
+    #pip install --no-cache-dir -e git+https://github.com/datopian/ckanext-xloader.git@feature/nhs-remote-hook#egg=ckanext-xloader && \
+    #pip install --no-cache-dir -r https://raw.githubusercontent.com/datopian/ckanext-xloader/feature/nhs-remote-hook/requirements.txt && \
+    # Install scheming extension from a pull request that contains fix for retaining "extra" fields for package
+    pip install --no-cache-dir -e git+https://github.com/ckan/ckanext-scheming.git@refs/pull/229/head#egg=ckanext-scheming && \
+    pip install --no-cache-dir -r https://raw.githubusercontent.com/ckan/ckanext-scheming/master/requirements.txt && \
+    pip install --no-cache-dir -e git+https://github.com/open-data/ckanext-repeating.git#egg=ckanext-repeating && \
+    pip install --no-cache-dir -e git+https://github.com/EnviDat/ckanext-composite.git@ckan-2.8#egg=ckanext-composite && \
+    # Security
+    pip install --no-cache-dir -e git+https://github.com/datopian/ckanext-security.git#egg=ckanext-security && \
+    # Install 'restricted' extension from our fork that has been aligned for our use case
+    pip install --no-cache-dir -e git+https://github.com/anuveyatsu/ckanext-restricted.git#egg=ckanext-restricted && \
+    # BigQuery Extension
+    #pip install --no-cache-dir -e git+https://github.com/datopian/ckanext-datastore-bigquery.git@v0.0.2.8#egg=ckanext-datastore-bigquery && \
+    #pip install --no-cache-dir -e git+https://github.com/datopian/ckanext-datastore-bigquery.git#egg=ckanext-datastore-bigquery && \
+    #pip install --no-cache-dir -r https://raw.githubusercontent.com/datopian/ckanext-datastore-bigquery/master/requirements.txt && \
+    # Ckan Aircan Extension
+    pip install --no-cache-dir -r https://raw.githubusercontent.com/datopian/ckanext-aircan/v0.0.4/requirements.txt && \
+    pip install --no-cache-dir -e git+https://github.com/datopian/ckanext-aircan.git@feature/giftless-uri#egg=ckanext-aircan && \
+    # Authz
+    pip install --no-cache-dir -r https://raw.githubusercontent.com/datopian/ckanext-authz-service/master/dev-requirements.py2.txt && \
+    pip install --no-cache-dir -e git+https://github.com/datopian/ckanext-authz-service.git#egg=ckanext-authz-service && \
+    #Sentry
+    pip install --no-cache-dir -r https://raw.githubusercontent.com/okfn/ckanext-sentry/master/requirements.txt && \
+    pip install --no-cache-dir -e git+https://github.com/okfn/ckanext-sentry.git#egg=ckanext-sentry && \
+    #External Storage
+    pip install --no-cache-dir -e git+https://github.com/datopian/ckanext-blob-storage.git@v0.3.9#egg=ckanext-external-storage && \
+    pip install --no-cache-dir -r https://raw.githubusercontent.com/datopian/ckanext-blob-storage/master/requirements.py2.txt
+
+# Create a local user and group to run the app
+RUN addgroup -g 92 -S ckan && \
+    adduser -u 92 -h /srv/app -H -D -S -G ckan ckan
+
+RUN mkdir -p /var/lib/ckan-nhs
+RUN chown -R ckan:ckan /var/lib/ckan-nhs
+
+ONBUILD RUN mkdir /docker-entrypoint.d
+#COPY docker-entrypoint.d/nhs/* /docker-entrypoint.d/
+
+COPY setup/uwsgi.conf /srv/app
+COPY setup/prerun.py /srv/app
+
+RUN mkdir /etc/supervisord.d
+RUN mkdir /tmp/supervisord
+RUN chown -R ckan.ckan /tmp/supervisord
+RUN chown -R ckan.ckan /etc/supervisord.d
+
+COPY setup/supervisord.conf /etc
+COPY setup/supervisord.d/* /etc/supervisord.d/
+
+COPY setup/nhs/google.json ${APP_DIR}
+COPY setup/nhs/google_readonly.json ${APP_DIR}
+
+COPY setup/authz-service/jwtRS256.key ${APP_DIR}/authz-service/
+COPY setup/authz-service/jwtRS256.key.pub ${APP_DIR}/authz-service/
+
+RUN chown -R ckan.ckan ${APP_DIR}
+
+EXPOSE 5000
+
+CMD ["/srv/app/start_ckan.sh"]
+
+RUN pip install --no-binary :all: -r https://raw.githubusercontent.com/ckan/ckan/${GIT_BRANCH}/dev-requirements.txt
+
+COPY setup/start_ckan_development.sh /srv/app
+
+RUN mkdir $SRC_EXTENSIONS_DIR
+RUN chown -R ckan.ckan ${SRC_EXTENSIONS_DIR}
+
+CMD ["/srv/app/start_ckan_development.sh"]
