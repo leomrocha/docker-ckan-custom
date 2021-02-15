@@ -1,0 +1,61 @@
+version: "3"
+
+services:
+
+  ckan-aircan:
+    container_name: ckan-aircan
+    build:
+      context: ckan/
+      dockerfile: Dockerfile.dev.aircan
+    env_file:
+      - .env.aircan      
+    links:
+      - db-aircan
+      - solr-aircan
+      - redis-aircan
+      # - datapusher-aircan
+    networks:
+      default:
+        aliases:
+          - ckan
+    ports:
+      - "5000:5000"
+    volumes:
+      - ckan_storage_aircan:/var/lib/ckan-aircan
+      - ./src:/srv/app/src_extensions
+      - /home/leo/Datopian/ckanext-aircan:/srv/app/src_extensions/ckanext-aircan
+
+  # datapusher-aircan:
+  #   container_name: datapusher-aircan
+  #   image: keitaro/ckan-datapusher:0.0.17
+  #   ports:
+  #       - "8000:8000"
+  #   environment:
+  #       - DATAPUSHER_SSL_VERIFY=False
+  #       - DATAPUSHER_REWRITE_URL=http://ckan:5000/
+  #       - DATAPUSHER_MAX_CONTENT_LENGTH=80000000
+
+  db-aircan:
+    container_name: db-aircan
+    env_file:
+      - .env.aircan
+    build:
+      context: postgresql/
+    volumes:
+      - pg_data_aircan:/var/lib/postgresql/data
+
+  solr-aircan:
+    container_name: solr-aircan
+    build:
+      context: solr/
+    volumes:
+      - solr_data_aircan:/opt/solr/server/solr/ckan/data/index
+
+  redis-aircan:
+    container_name: redis-aircan
+    image: redis:alpine
+
+volumes:
+  ckan_storage_aircan:
+  pg_data_aircan:
+  solr_data_aircan:

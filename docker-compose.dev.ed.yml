@@ -13,31 +13,31 @@ services:
       - db-ed
       - solr-ed
       - redis-ed
-      - datapusher-ed
+        #- datapusher-ed
     networks:
       default:
         aliases:
-          - ckan.local.com
+          - ckan
     ports:
       - "5000:5000"
     volumes:
       - ckan_storage_ed:/var/lib/ckan-ed
       - ./src:/srv/app/src_extensions
       # debug extensions
-      - /home/higor/Documents/Datopian/Projects/extensions/ckanext-ed:/srv/app/src_extensions/ckanext-ed
+      - /home/leo/Freelancing/Datopian/us-dept-of-education/ckanext-ed:/srv/app/src_extensions/ckanext-ed
       #- /home/higor/Documents/Datopian/Projects/extensions/ckanext-collections:/srv/app/src_extensions/ckanext-collections
       #- /home/higor/Documents/Datopian/Projects/extensions/ckanext-harvest:/srv/app/src_extensions/ckanext-harvest
       #- /home/higor/Documents/Datopian/Projects/extensions/ckanext-datajson:/srv/app/src_extensions/ckanext-datajson
 
-  datapusher-ed:
-    container_name: datapusher-ed
-    image: keitaro/ckan-datapusher:0.0.17
-    ports:
-        - "8000:8000"
-    environment:
-        - DATAPUSHER_SSL_VERIFY=False
-        - DATAPUSHER_REWRITE_URL=http://ckan.local.com:5000/
-        - DATAPUSHER_MAX_CONTENT_LENGTH=80000000
+        #  datapusher-ed:
+        #    container_name: datapusher-ed
+        #    image: keitaro/ckan-datapusher:0.0.17
+        #    ports:
+        #        - "8000:8000"
+        #    environment:
+        #        - DATAPUSHER_SSL_VERIFY=False
+        #        - DATAPUSHER_REWRITE_URL=http://ckan:5000/
+        #        - DATAPUSHER_MAX_CONTENT_LENGTH=80000000
 
   db-ed:
     container_name: db-ed

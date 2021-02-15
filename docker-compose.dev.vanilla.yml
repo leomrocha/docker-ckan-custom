@@ -17,7 +17,7 @@ services:
     networks:
       default:
         aliases:
-          - ckan.local.com
+          - ckan
     ports:
       - "5000:5000"
     volumes:
@@ -31,7 +31,7 @@ services:
         - "8000:8000"
     environment:
         - DATAPUSHER_SSL_VERIFY=False
-        - DATAPUSHER_REWRITE_URL=http://ckan.local.com:5000/
+        - DATAPUSHER_REWRITE_URL=http://ckan:5000/
         - DATAPUSHER_MAX_CONTENT_LENGTH=80000000
 
   db-vanilla:

@@ -11,7 +11,7 @@ ENV PIP_SRC=${SRC_DIR}
 ENV APP_DIR=/srv/app
 ENV SRC_EXTENSIONS_DIR=/srv/app/src_extensions
 
-ENV CKAN__SITE_URL=http://ckan.local.com:5000
+ENV CKAN__SITE_URL=http://ckan:5000
 ENV CKAN__PLUGINS envvars image_view text_view recline_view datastore datapusher
 ENV CKAN_INI=/srv/app/development.ini
 

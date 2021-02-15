@@ -17,7 +17,7 @@ services:
     networks:
       default:
         aliases:
-          - ckan.local.com
+          - ckan
     ports:
       - "5000:5000"
     volumes:

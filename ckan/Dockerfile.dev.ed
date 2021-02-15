@@ -11,7 +11,7 @@ ENV PIP_SRC=${SRC_DIR}
 ENV APP_DIR=/srv/app
 ENV SRC_EXTENSIONS_DIR=/srv/app/src_extensions
 
-ENV CKAN__SITE_URL=http://ckan.local.com:5000
+ENV CKAN__SITE_URL=http://ckan:5000
 ENV CKAN__PLUGINS envvars image_view text_view recline_view datastore datapusher
 ENV CKAN_INI=/srv/app/development.ini
 
@@ -55,8 +55,8 @@ RUN apk add --no-cache libffi-dev
                                 
 RUN mkdir -p ${SRC_DIR} 
 
-RUN curl -o ${SRC_DIR}/get-pip.py https://bootstrap.pypa.io/get-pip.py && \   
-    python ${SRC_DIR}/get-pip.py &&  \  
+RUN curl -o ${SRC_DIR}/get-pip.py https://bootstrap.pypa.io/2.7/get-pip.py && \
+    python ${SRC_DIR}/get-pip.py pip==20.3.3 wheel==0.36.2 setuptools==44.1.1 && \
     pip install supervisor
 
 RUN rm -rf ${SRC_DIR}/get-pip.py
@@ -105,7 +105,8 @@ RUN pip install --upgrade pip==20.3 && pip install  --no-cache-dir git+https://g
     pip install -e git+https://github.com/datopian/ckanext-googleanalytics.git@ed-debug#egg=ckanext-googleanalytics && \
     pip install -r https://raw.githubusercontent.com/datopian/ckanext-googleanalytics/ed-debug/requirements.txt && \
     # contact
-    pip install -e git+https://github.com/okfn/ckanext-contact.git@lacounts-0.1#egg=ckanext-contact
+    pip install -e git+https://github.com/okfn/ckanext-contact.git@lacounts-0.1#egg=ckanext-contact && \
+    pip install future openpyxl
 
 # For debuging
 RUN pip install ipdb
